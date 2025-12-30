@@ -44,4 +44,4 @@ jobs:
         if: env.CREATE_IMAGE == 'true'
         with:
           push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
+          tags: reg.k.aldaleel-inst.com/${{ github.event.repository.name }}:${{ env.IMAGE_TAG }}
