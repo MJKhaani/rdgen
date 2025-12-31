@@ -142,6 +142,16 @@ jobs:
             repository: rustdesk/rustdesk
             submodules: recursive
 
+      - name: Ensure Rosetta is ready
+        if: matrix.job.arch == 'x86_64' && matrix.job.os == 'macos-14'
+        run: |
+          if /usr/bin/pgrep -q oahd; then
+            echo "Rosetta is already running."
+          else
+            echo "Rosetta not running, attempting install..."
+            sudo softwareupdate --install-rosetta --agree-to-license || echo "Rosetta install returned error (might be already installed)"
+          fi
+
       - name: Install imagemagick and potrace and nasm and and
         shell: bash
         run: |
@@ -527,7 +537,13 @@ jobs:
             sed -i -e "s/MACOSX_DEPLOYMENT_TARGET = [0-9]*.[0-9]*;/MACOSX_DEPLOYMENT_TARGET = ${MIN_MACOS_VERSION};/" flutter/macos/Runner.xcodeproj/project.pbxproj
           fi
           sed -i -e "s/RustDesk.app/\"${{ inputs.appname }}.app\"/" build.py
-          ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
+
+          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
+            # Force execution as Intel via Rosetta
+            arch -x86_64 ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
+          else
+            ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
+          fi
 
       # - name: Copy service file
       #   run: |
