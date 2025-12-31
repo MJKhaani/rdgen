@@ -315,9 +315,9 @@ jobs:
           [ -f "./rustdesk/data/flutter_assets/assets/icon.svg" ] && mv ./rustdesk/data/flutter_assets/assets/icon.svg ./rustdesk/data/flutter_assets/assets/icon.svg.bak
             
           # Create standard app icons
-          magick ./res/icon.png -resize 32x32 ./res/32x32.png
-          magick ./res/icon.png -resize 64x64 ./res/64x64.png
-          magick ./res/icon.png -resize 128x128 ./res/128x128.png
+          magick ./res/icon.png -strip -colorspace sRGB -type TrueColorAlpha -resize 32x32 ./res/32x32.png
+          magick ./res/icon.png -strip -colorspace sRGB -type TrueColorAlpha -resize 64x64 ./res/64x64.png
+          magick ./res/icon.png -strip -colorspace sRGB -type TrueColorAlpha -resize 128x128 ./res/128x128.png
           
           # Copy icon to Flutter assets
           cp ./res/icon.png ./flutter/assets/icon.png
@@ -339,7 +339,7 @@ jobs:
           magick ./res/icon.png -strip -colorspace sRGB -type TrueColorAlpha -resize 1024x1024 "flutter/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png"
 
           # Create macOS specific icons
-          magick ./res/icon.png -resize -strip -colorspace sRGB -type TrueColorAlpha 128x128 ./res/mac-icon.png
+          magick ./res/icon.png -strip -colorspace sRGB -type TrueColorAlpha -resize 128x128 ./res/mac-icon.png
           
           # Create dark mode tray icon (optimized for macOS menu bar)
           magick ./res/icon.png -resize 22x22 -colorspace gray -alpha set -background none -channel A -evaluate set 100% ./res/mac-tray-dark-x2.png
