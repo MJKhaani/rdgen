@@ -142,15 +142,15 @@ jobs:
             repository: rustdesk/rustdesk
             submodules: recursive
 
-      - name: Ensure Rosetta is ready
-        if: matrix.job.arch == 'x86_64' && matrix.job.os == 'macos-14'
-        run: |
-          if /usr/bin/pgrep -q oahd; then
-            echo "Rosetta is already running."
-          else
-            echo "Rosetta not running, attempting install..."
-            sudo softwareupdate --install-rosetta --agree-to-license || echo "Rosetta install returned error (might be already installed)"
-          fi
+ #     - name: Ensure Rosetta is ready
+ #       if: matrix.job.arch == 'x86_64' && matrix.job.os == 'macos-14'
+ #       run: |
+ #         if /usr/bin/pgrep -q oahd; then
+ #           echo "Rosetta is already running."
+ #         else
+ #           echo "Rosetta not running, attempting install..."
+ #           sudo softwareupdate --install-rosetta --agree-to-license || echo "Rosetta install returned error (might be already installed)"
+ #         fi
 
       - name: Install imagemagick and potrace and nasm and and
         shell: bash
