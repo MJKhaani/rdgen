@@ -490,6 +490,7 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
+          export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           if ! $VCPKG_ROOT/vcpkg \
             install \
             --triplet ${{ matrix.job.vcpkg-triplet }} \
