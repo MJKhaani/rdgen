@@ -496,8 +496,9 @@ jobs:
             export VCPKG_TARGET_ARCHITECTURE="x64"
             echo "Uninstalling NASM for x64 build"
             brew uninstall nasm --ignore-dependencies || true
-            echo "Patching res/vcpkg/aom/portfile.cmake to use yasm..."
-            sed -i '' -e 's/vcpkg_find_acquire_program(NASM)/set(NASM "yasm")/g' res/vcpkg/aom/portfile.cmake
+            echo "Patching all custom portfiles in res/vcpkg to use yasm instead of nasm..."
+            find res/vcpkg -name "portfile.cmake" -print0 | xargs -0 sed -i '' -e 's/vcpkg_find_acquire_program(NASM)/set(NASM "yasm")/g'
+            grep "set(NASM \"yasm\")" res/vcpkg/ffmpeg/portfile.cmake || cat res/vcpkg/ffmpeg/portfile.cmake
           fi
           if ! $VCPKG_ROOT/vcpkg \
             install \
