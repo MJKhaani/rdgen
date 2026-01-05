@@ -490,11 +490,14 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
-          brew uninstall nasm --ignore-dependencies || true
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "Using SDKROOT: $SDKROOT"
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
             export VCPKG_TARGET_ARCHITECTURE="x64"
+            echo "Uninstalling NASM for x64 build"
+            brew uninstall nasm --ignore-dependencies || true
+            echo "Patching res/vcpkg/aom/portfile.cmake to use yasm..."
+            sed -i '' -e 's/vcpkg_find_acquire_program(NASM)/set(NASM "yasm")/g' res/vcpkg/aom/portfile.cmake
           fi
           if ! $VCPKG_ROOT/vcpkg \
             install \
