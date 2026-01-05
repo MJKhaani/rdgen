@@ -490,6 +490,7 @@ jobs:
 
       - name: Install vcpkg dependencies
         run: |
+          brew uninstall nasm --ignore-dependencies || true
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "Using SDKROOT: $SDKROOT"
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
