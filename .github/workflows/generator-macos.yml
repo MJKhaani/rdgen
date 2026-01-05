@@ -491,9 +491,11 @@ jobs:
       - name: Install vcpkg dependencies
         run: |
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
+            export VCPKG_TARGET_ARCHITECTURE="x64"
+          fi
           if ! $VCPKG_ROOT/vcpkg \
             install \
-            --triplet ${{ matrix.job.vcpkg-triplet }} \
             --x-install-root="$VCPKG_ROOT/installed"; then
             find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
               echo "$_1:"
