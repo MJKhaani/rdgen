@@ -528,12 +528,11 @@ jobs:
           fi
           sed -i -e "s/RustDesk.app/\"${{ inputs.appname }}.app\"/" build.py
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
-            # Force execution as Intel via Rosetta
             export CARGO_BUILD_TARGET="x86_64-apple-darwin"
-            arch -x86_64 ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
-          else
-            ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
-          fi
+            arch -x86_64 ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
+          else
+            ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
+          fi
 
       # - name: Copy service file
       #   run: |
