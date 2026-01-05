@@ -145,7 +145,7 @@ jobs:
       - name: Install imagemagick and potrace and nasm and and
         shell: bash
         run: |
-          brew install imagemagick potrace nasm cmake gcc wget ninja
+          brew install imagemagick potrace yasm cmake gcc wget ninja llvm create-dmg pkg-config
           echo "$(brew --prefix imagemagick)/bin" >> $GITHUB_PATH
 
       - name: Update macOS Info.plist and settings
@@ -491,19 +491,23 @@ jobs:
       - name: Install vcpkg dependencies
         run: |
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          echo "Using SDKROOT: $SDKROOT"
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
             export VCPKG_TARGET_ARCHITECTURE="x64"
           fi
           if ! $VCPKG_ROOT/vcpkg \
             install \
+            --triplet ${{ matrix.job.vcpkg-triplet }} \
             --x-install-root="$VCPKG_ROOT/installed"; then
+            
+            echo "VCPKG FAILED - Dumping logs:"
             find "${VCPKG_ROOT}/" -name "*.log" | while read -r _1; do
-              echo "$_1:"
+              echo "File: $_1"
               echo "======"
               cat "$_1"
               echo "======"
-              echo ""
             done
+            # Force the workflow to stop here if vcpkg fails
             exit 1
           fi
           head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
@@ -521,6 +525,9 @@ jobs:
           mkdir -p ./build/macos/Build/Products/Release/RustDesk.app/Contents/MacOS
 
       - name: Build rustdesk
+        env:
+          # Define the target here so it applies to the whole step and shows in logs
+          CARGO_BUILD_TARGET: ${{ matrix.job.target }}
         run: |
           if [ "${{ matrix.job.target }}" = "aarch64-apple-darwin" ]; then
             MIN_MACOS_VERSION="12.3"
@@ -531,7 +538,6 @@ jobs:
           fi
           sed -i -e "s/RustDesk.app/\"${{ inputs.appname }}.app\"/" build.py
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
-            export CARGO_BUILD_TARGET="x86_64-apple-darwin"
             arch -x86_64 ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
           else
             ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
