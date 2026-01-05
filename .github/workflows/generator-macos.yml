@@ -142,16 +142,6 @@ jobs:
             repository: rustdesk/rustdesk
             submodules: recursive
 
- #     - name: Ensure Rosetta is ready
- #       if: matrix.job.arch == 'x86_64' && matrix.job.os == 'macos-14'
- #       run: |
- #         if /usr/bin/pgrep -q oahd; then
- #           echo "Rosetta is already running."
- #         else
- #           echo "Rosetta not running, attempting install..."
- #           sudo softwareupdate --install-rosetta --agree-to-license || echo "Rosetta install returned error (might be already installed)"
- #         fi
-
       - name: Install imagemagick and potrace and nasm and and
         shell: bash
         run: |
@@ -369,7 +359,6 @@ jobs:
           cp "flutter/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" "./iconset.iconset/icon_256x256@2x.png"
           cp "flutter/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_512.png" "./iconset.iconset/icon_512x512.png"
           cp "flutter/macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_1024.png" "./iconset.iconset/icon_512x512@2x.png"
-          ls "./iconset.iconset/"
           iconutil -c icns ./iconset.iconset -o ./flutter/macos/Runner/AppIcon.icns
           rm -rf ./iconset.iconset
           
@@ -537,9 +526,9 @@ jobs:
             sed -i -e "s/MACOSX_DEPLOYMENT_TARGET = [0-9]*.[0-9]*;/MACOSX_DEPLOYMENT_TARGET = ${MIN_MACOS_VERSION};/" flutter/macos/Runner.xcodeproj/project.pbxproj
           fi
           sed -i -e "s/RustDesk.app/\"${{ inputs.appname }}.app\"/" build.py
-
           if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
             # Force execution as Intel via Rosetta
+            export CARGO_BUILD_TARGET="x86_64-apple-darwin"
             arch -x86_64 ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
           else
             ./build.py --flutter --hwcodec --unix-file-copy-paste ${{ matrix.job.extra-build-args }}
