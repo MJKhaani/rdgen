@@ -778,6 +778,11 @@ jobs:
           shell: /bin/bash
           install: |
             apt-get update -y
+            # Install software-properties-common to get 'add-apt-repository'
+            apt-get install -y software-properties-common
+            # Add the official Flatpak PPA to get a version that supports large summaries
+            add-apt-repository -y ppa:flatpak/stable
+            apt-get update -y
             apt-get install -y git flatpak flatpak-builder
           run: |
             # disable git safe.directory
