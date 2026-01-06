@@ -515,7 +515,11 @@ jobs:
             # Force the workflow to stop here if vcpkg fails
             exit 1
           fi
-          head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
+          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
+            echo "Force installing ffmpeg for ${{ matrix.job.vcpkg-triplet }}..."
+            $VCPKG_ROOT/vcpkg install ffmpeg:${{ matrix.job.vcpkg-triplet }} --x-install-root="$VCPKG_ROOT/installed"
+          fi
+         head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
 
       - name: Report Status
         uses: fjogeleit/http-request-action@v1
