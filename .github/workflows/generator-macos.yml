@@ -482,6 +482,21 @@ jobs:
           name: bridge-artifact
           path: ./
 
+      - name: Correcting the ARCH
+        run:  |
+          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
+           TARGET_ARCH="x86_64"
+          else
+            TARGET_ARCH="arm64"
+          fi
+          echo "Setting OSX Architectures to: $TARGET_ARCH"
+          export CMAKE_OSX_ARCHITECTURES="$TARGET_ARCH"
+          export VCPKG_OSX_ARCHITECTURES="$TARGET_ARCH"
+          
+          # Persist these to GITHUB_ENV so they apply to future steps in this job too
+          echo "CMAKE_OSX_ARCHITECTURES=$TARGET_ARCH" >> $GITHUB_ENV
+          echo "VCPKG_OSX_ARCHITECTURES=$TARGET_ARCH" >> $GITHUB_ENV
+
       - name: Setup vcpkg with Github Actions binary cache
         uses: lukka/run-vcpkg@v11
         with:
@@ -492,14 +507,6 @@ jobs:
         run: |
           export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
           echo "Using SDKROOT: $SDKROOT"
-          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
-            export VCPKG_TARGET_ARCHITECTURE="x64"
-            echo "Uninstalling NASM for x64 build"
-            brew uninstall nasm --ignore-dependencies || true
-            echo "Patching all custom portfiles in res/vcpkg to use yasm instead of nasm..."
-            find res/vcpkg -name "portfile.cmake" -print0 | xargs -0 sed -i '' -e 's/vcpkg_find_acquire_program(NASM)/set(NASM "yasm")/g'
-            grep "set(NASM \"yasm\")" res/vcpkg/ffmpeg/portfile.cmake || cat res/vcpkg/ffmpeg/portfile.cmake
-          fi
           if ! $VCPKG_ROOT/vcpkg \
             install \
             --triplet ${{ matrix.job.vcpkg-triplet }} \
@@ -514,10 +521,6 @@ jobs:
             done
             # Force the workflow to stop here if vcpkg fails
             exit 1
-          fi
-          if [ "${{ matrix.job.arch }}" = "x86_64" ]; then
-            echo "Force installing ffmpeg for ${{ matrix.job.vcpkg-triplet }}..."
-            $VCPKG_ROOT/vcpkg install ffmpeg:${{ matrix.job.vcpkg-triplet }} --x-install-root="$VCPKG_ROOT/installed"
           fi
           head -n 100 "${VCPKG_ROOT}/buildtrees/ffmpeg/build-${{ matrix.job.vcpkg-triplet }}-rel-out.log" || true
 
